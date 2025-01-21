@@ -8,6 +8,7 @@ git clone https://github.com/sksakib707/Code-Assistitant-Project.git
 ## *[optional]* better  creating a virtual environment before installing the dependency by  following code:-
 ```bash
 pip install virtualenv
+virtualenv --version
 python -m venv env(environment name)
 cd env(environment name)/Scripts
 ./activate
