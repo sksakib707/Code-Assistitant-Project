@@ -1,28 +1,28 @@
 QComboBox#drop_down {
     background-color: #132a38;
-    color:white;
+    color: white;
     padding: 0px;
     font-size: 25px;
     margin: 0px;
     border: none
 }
 
-QWidget#left_container{
+QWidget#left_container {
     background-color: #132a38;
     margin: 0;
     padding: 0;
 }
 
-QPushButton#folder{
+QPushButton#folder {
     background-color: rgb(18, 51, 94);
-    color:white;
+    color: white;
     padding: 5px;
     font-size: 15px;
     border-radius: 10px;
     margin: 0px;
 }
 
-QTreeWidget#tree_view{
+QTreeWidget#tree_view {
     /* background-color: #132a38; */
     background-color: rgb(13, 43, 83);
     color: white;
@@ -35,22 +35,22 @@ QTreeWidget#tree_view{
 
 /*editor seetings*/
 
-QVBoxLayout#folder_tree{
+QVBoxLayout#folder_tree {
     background-color: #132a38;
     margin: 0;
     padding: 0;
 }
 
-QPushButton#btn{
+QPushButton#btn {
     background-color: rgb(18, 51, 94);
-    color:white;
+    color: white;
     padding: 5px;
     font-size: 15px;
     border-radius: 10px;
     margin: 0px;
 }
 
-QTreeWidget#tree_view_editor{
+QTreeWidget#tree_view_editor {
     /* background-color: #132a38; */
     background-color: rgb(13, 43, 83);
     color: white;
@@ -61,19 +61,32 @@ QTreeWidget#tree_view_editor{
     border-radius: 10px;
 }
 
-QLineEdit#prompt{
+QLineEdit#prompt {
     border-radius: 5px;
     border: 1px solid #132a38;
     padding: 5px;
 }
-QPushButton#send{
+
+QPushButton#send {
     background-color: rgb(207, 206, 206);
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     font-size: 15px;
     border: 1px solid antiquewhite;
     padding: 5 10px;
-    border-radius:5px ;
+    border-radius: 5px;
 }
-QPushButton#send:hover{
+
+QPushButton#send:hover {
     background-color: aliceblue;
+}
+
+QPushButton#zoomButton {
+    background-color: #132a38;
+    color: azure;
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+QPushButton#zoomButton:hover {
+    background-color: #1c3f55;
 }

@@ -1,12 +1,13 @@
 from PyQt5.QtCore import (Qt,
-    QThread, 
-    pyqtSignal, 
-    pyqtSlot)
-from PyQt5.QtWidgets import (QWidget, 
-    QPushButton, 
+    QThread,
+    pyqtSignal,
+    pyqtSlot,
+    QPoint)
+from PyQt5.QtWidgets import (QWidget,
+    QPushButton,
     QTreeWidget,
-    QTreeWidgetItem, 
-    QVBoxLayout, 
+    QTreeWidgetItem,
+    QVBoxLayout,
     QHBoxLayout,
     QFileDialog,
     QLabel,
@@ -14,56 +15,97 @@ from PyQt5.QtWidgets import (QWidget,
 
 from PyQt5.QtGui import (QPixmap, QImage)
 import fitz  # PyMuPDF
+from multiprocessing import Pool,cpu_count
+from functools import partial
+import math
 import os
 
-class PageLoaderThread(QThread):
-    page_loaded = pyqtSignal(int, QPixmap)  # Signal for each loaded page
 
-    def __init__(self, file_path):
+class PageLoaderThread(QThread):
+    page_loaded = pyqtSignal(int, QPixmap)  # Emit page number and pixmap
+
+    def __init__(self, file_path, scale_factor=1.0):
         super().__init__()
         self.file_path = file_path
+        self.scale_factor = scale_factor
 
     def run(self):
         doc = fitz.open(self.file_path)
         for i in range(len(doc)):
             page = doc[i]
-            pix = page.get_pixmap()
+            # Re-render the page at the desired scale factor
+            mat = fitz.Matrix(self.scale_factor, self.scale_factor)
+            pix = page.get_pixmap(matrix=mat)
             image = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(image)
-            self.page_loaded.emit(i + 1, pixmap)  # Emit the page number and pixmap for each page
+            self.page_loaded.emit(i, pixmap)  # Emit page number and pixmap
         doc.close()
 
 class PDFView(QWidget):
     def __init__(self):
         super().__init__()
-        self.width = 720
-        self.height = 720
-        self.setWindowTitle('PDF Viewer')
-        self.resize(self.width, self.height)
-        self.layout = QVBoxLayout()
-
+        self.current_file_path = None
+        self.current_scale_factor = 1.0
+        # Other initialization...
         self.pdf_page = QWidget()
         self.pdf_layout = QVBoxLayout(self.pdf_page)
         self.pdf_layout.setAlignment(Qt.AlignCenter)
-        
-        self.scroll_area = QScrollArea()
+
+        # Scroll area to contain the PDF page
+        self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidget(self.pdf_page)
         self.scroll_area.setWidgetResizable(True)
 
-        # self.button = QPushButton('Open PDF')
-        # self.button.clicked.connect(self.getPdfFile)
-         
-        self.layout.addWidget(self.scroll_area)
-        # self.layout.addWidget(self.button)
+        # Main layout for the entire PDFView widget
+        self.main_layout = QHBoxLayout()
+        self.main_layout.addWidget(self.scroll_area)
+        self.setLayout(self.main_layout)
 
-        self.setLayout(self.layout)
+        # Zoom buttons
+        self.zoom_in_button = QPushButton("+", self)
+        self.zoom_in_button.clicked.connect(self.zoomInClicked)
+        self.zoom_in_button.setObjectName("zoomButton")
+        self.zoom_out_button = QPushButton("-", self)
+        self.zoom_out_button.clicked.connect(self.zoomOutClicked)
+        self.zoom_out_button.setObjectName("zoomButton")
+        self.zoom_in_button.setFixedSize(50, 50)
+        self.zoom_out_button.setFixedSize(50, 50)
 
-    def getPdfFile(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open PDF File", "", "PDF Files (*.pdf)")
-        if file_path:
-            self.startLoadingPDF(file_path)
+        # Place buttons at the bottom-right of the scroll area
+        self.zoom_in_button.move(self.scroll_area.width() - self.zoom_in_button.width() ,
+                                 self.scroll_area.height() - 2 * self.zoom_in_button.height())
+        self.zoom_out_button.move(self.scroll_area.width() - self.zoom_out_button.width(),
+                                  self.scroll_area.height() - self.zoom_out_button.height() )
+
+        # Ensure buttons stay on top of the scroll area
+        self.zoom_out_button.raise_()
+
+        # Handle window resizing to keep buttons at the correct position
+        self.resizeEvent = self._on_resize
+    def _on_resize(self, event):
+        #Update button positions when the window is resized.
+        self.zoom_in_button.move(self.scroll_area.width() - self.zoom_in_button.width() - 10,
+                                 self.scroll_area.height() - 2 * self.zoom_in_button.height() - 10)
+        self.zoom_out_button.move(self.scroll_area.width() - self.zoom_out_button.width() - 10,
+                                  self.scroll_area.height() - self.zoom_out_button.height() - 10)
+        self.zoom_in_button.show()
+        self.zoom_out_button.show()
+
+    def zoomInClicked(self):
+        self.current_scale_factor += 0.2
+        self.startLoadingPDF(self.current_file_path)
+
+    def zoomOutClicked(self):
+        self.current_scale_factor = max(0.2, self.current_scale_factor - 0.2)
+        self.startLoadingPDF(self.current_file_path)
 
     def startLoadingPDF(self, file_path):
+
+        if not file_path:
+            return
+
+        self.current_file_path = file_path
+
         # Clear previous pages
         for i in reversed(range(self.pdf_layout.count())):
             widget = self.pdf_layout.itemAt(i).widget()
@@ -75,9 +117,10 @@ class PDFView(QWidget):
         self.pdf_layout.addWidget(self.loading_label)
 
         # Start the thread to load PDF pages
-        self.page_loader_thread = PageLoaderThread(file_path)
+        self.page_loader_thread = PageLoaderThread(file_path, self.current_scale_factor)
         self.page_loader_thread.page_loaded.connect(self.displayPage)
         self.page_loader_thread.start()
+
 
     @pyqtSlot(int, QPixmap)
     def displayPage(self, page_number, pixmap):
@@ -85,10 +128,6 @@ class PDFView(QWidget):
         if hasattr(self, 'loading_label'):
             self.loading_label.deleteLater()
             del self.loading_label
-
-        # Display loading message for each page
-        # page_number_label = QLabel(f'Loading page: {page_number}')
-        # self.pdf_layout.addWidget(page_number_label)
 
         # Display the actual page
         image_label = QLabel()
@@ -98,7 +137,7 @@ class PDFView(QWidget):
 class Library(QWidget):
     def __init__(self):
         super().__init__()
-        # self.resize(1080,720)
+
         self._b_folder_open = QPushButton('Folders')
         self._b_folder_open.setObjectName('folder')
         self._b_folder_open.clicked.connect(self.open_folder)
@@ -117,14 +156,14 @@ class Library(QWidget):
         self._left_side_layout.addWidget(self._b_folder_open)
         self._left_side_layout.addWidget(self._file_tree)
 
-        
+
         self.library_layout = QHBoxLayout()
         self.library_layout.addLayout(self._left_side_layout,20)
         self.library_layout.addWidget(self._pdf_view,80)
         self.setLayout(self.library_layout)
-    
+
     def view_pdf(self,item,col):
-        # print("this is view_pdf function")
+
         texts = []
         try:
             while item is not None:
@@ -154,7 +193,7 @@ class Library(QWidget):
     def populate_tree(self, folder_path):
         root_item = QTreeWidgetItem(self._file_tree)
         root_item.setText(0, os.path.basename(folder_path))
-        # self._b_folder_open.setText(os.path.basename(folder_path))
+
         root_item.setData(0, Qt.UserRole, folder_path)
         self.add_tree_items(root_item, folder_path)
         root_item.setExpanded(True)
@@ -175,7 +214,3 @@ class Library(QWidget):
                     tree_item = QTreeWidgetItem(parent_item)
                     tree_item.setText(0, item_name)
                     tree_item.setData(0,Qt.UserRole , item_path)
-
-                    
-
-
