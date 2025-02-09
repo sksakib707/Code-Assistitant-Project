@@ -96,29 +96,6 @@ import jedi
 import inspect
 
 
-pkg_map = {
-    "apt": "sudo apt install {} -y",
-    "dnf": "sudo dnf install {} -y",
-    "pacman": "sudo pacman -S {}",
-    "apk": "sudo apk add {} -y",
-    "zypper": "sudo zypper install {} -y",
-    "brew": "brew install {} -y",
-}
-
-term_map = {
-    "konsole": "konsole --hold -e {}",
-    "alacritty": "alacritty --hold -e {}",
-    "kitty": "kitty --hold --detach -e {}",
-    "powershell": "powershell -NoExit -Command {}",
-    "gnome-terminal": "gnome-terminal --hold -e {}",
-    "xfce-terminal": "xfce-terminal --hold -e {}",
-    "xterm": "xterm --hold -e {}",
-}
-
-
-
-
-
 def resource_path(relative_path):
     # Get absolute path to resource, works for dev and for PyInstaller
     if getattr(sys, 'frozen', False):
@@ -157,7 +134,7 @@ class GeminiThreat(QThread):
             response = requests.get("https://google.com", timeout=5)
             return True
         except requests.ConnectionError:
-            return False 
+            return False
 
     # Defining the run method, which is executed when the thread starts.
     def run(self):
@@ -168,10 +145,6 @@ class GeminiThreat(QThread):
         # Iterating through the chunks of the AI response.
         if (self.check_internet_connection()):
             for chunk in self.ai.generateAnswer(self.input_text):
-
-                # self._chat_area.insertPlainText(chunk.text) #commented out:  Replaced by accumulating markdown
-
-                # self._chat_area.repaint() #commented out: Repaint handled by progress signal
 
                 # Appending the text of each chunk to the markdown string.
                 markdown += chunk.text
@@ -202,7 +175,7 @@ class GeminiAi:  # Defining a class GeminiAi for interacting with the Google Gem
         self._chat = self._model.start_chat()
 
     # Method to generate an answer from the AI model, takes input string as argument.
-    
+
 
     def generateAnswer(self, input: str):
 
@@ -580,16 +553,10 @@ class EditorUI(QWidget):
     def install(self, package):
         if platform.system() == "Windows":
             if package == "python":
-                # Download and run Python installer
-                # subprocess.run(["curl", "-o", "python-installer.exe",
-                                # "https://www.python.org/ftp/python/3.12.1/python-3.12.1-amd64.exe"])
-                # subprocess.run(["python-installer.exe"])
+                # Download and run Python installer link
                 webbrowser.open("https://www.python.org/downloads/")
             elif package in {"gcc", "g++"}:
-                # Download and run MinGW installer
-                # subprocess.run(["curl", "-o", "mingw-w64-installer.exe",
-                                # "https://sourceforge.net/projects/mingw-w64/files/latest/download"])
-                # subprocess.run(["mingw-w64-installer.exe"])
+                # Download and run MinGW installer link
                 webbrowser.open("https://sourceforge.net/projects/mingw-w64/files/latest/download")
             else:
                 print(f"Unsupported package: {package},please surch on internet 'how to install {package}'")
@@ -619,8 +586,6 @@ class EditorUI(QWidget):
 
             # Opening the file in write mode.
             with open(file_path, 'w') as file:
-
-                # print(self.text()) #commented out: Unnecessary print statement.
 
                 # Getting the text from the editor.
                 file_text = self.ide.text()
@@ -699,7 +664,7 @@ class EditorUI(QWidget):
                     print("Compilation successful. Running the program...")
                     if platform.system() == "Windows":
                         output_command = output_file.replace("\\","/").split('.')[0]
-                        
+
                 #    subprocess.run([output_file]) # Running the compiled program.
                     self.execute_cmd(f"./{output_file}")
 
@@ -770,7 +735,7 @@ class Editor(QsciScintilla):
 
         # Initializing the directory path to an empty string.
         self.dir_path = ''
-    
+
 
     def loadFile(self, filepath):  # Method to load a file into the editor.
 
@@ -785,7 +750,7 @@ class Editor(QsciScintilla):
 
                 # Setting the text of the editor to the file content.
                 self.setText(file_text)
-            
+
 
                 extension = filepath.split(".")[-1]  # Getting the file extension.
 
@@ -828,7 +793,7 @@ class Editor(QsciScintilla):
                 self.lexer.setColor(QColor("#9eaaaae"))
             except Exception as e:
                 print(e)
-            
+
 
     def openFile(self):  # Method to open a file using a file dialog.
 
@@ -888,7 +853,7 @@ class Editor(QsciScintilla):
                 with open(fileName, 'w') as file:  # Creating the file.
 
                     file.write('')  # Writing an empty string to the file.
-            
+
 
     def saveFile(self):  # Method to save a file.
 
@@ -985,25 +950,25 @@ class Editor(QsciScintilla):
         api = QsciAPIs(self.lexer)
         """Add C++ keywords and common functions to the auto-completion API for faster suggestion."""
         cpp_headers = [
-            "#include", "#define", "#if", "#elif", "#else", "#endif", "#ifdef", "#ifndef", "#pragma", "#error", "#warning", 
-            "iostream", "fstream", "sstream", "string", "vector", "map", "set", "list", "deque", 
-            "algorithm", "cmath", "cstdlib", "ctime", "cassert", "cstdio", "cstring", "climits", 
-            "cfloat", "iterator", "memory", "functional", "thread", "mutex", "condition_variable", 
-            "atomic", "type_traits", "initializer_list", "tuple", "exception", "stdexcept", "utility", 
+            "#include", "#define", "#if", "#elif", "#else", "#endif", "#ifdef", "#ifndef", "#pragma", "#error", "#warning",
+            "iostream", "fstream", "sstream", "string", "vector", "map", "set", "list", "deque",
+            "algorithm", "cmath", "cstdlib", "ctime", "cassert", "cstdio", "cstring", "climits",
+            "cfloat", "iterator", "memory", "functional", "thread", "mutex", "condition_variable",
+            "atomic", "type_traits", "initializer_list", "tuple", "exception", "stdexcept", "utility",
             "bitset", "random", "regex", "locale", "valarray", "array", "unordered_map", "unordered_set",
-            "chrono", "future", "numeric", "memory", "complex", "valarray", "exception", "bitset", 
-            "tuple", "initializer_list", "atomic", "thread", "mutex", "shared_mutex", "condition_variable", 
-            "unordered_map", "unordered_set", "deque", "array", "map", "set", "queue", "stack", "bitset", 
-            "typeindex", "typeinfo", "exception", "stdexcept", "limits", "locale", "random", "regex", "functional", 
-            "cctype", "cstdlib", "clocale", "cfenv", "cassert", "cstdarg", "cstdio", "cstring", "ctime", "cmath", 
-            "cstdio", "cfloat", "climits", "iterator", "type_traits", "chrono", "thread", "future", "atomic", 
-            "sstream", "sstream", "unordered_map", "unordered_set", "shared_ptr", "unique_ptr", "weak_ptr", 
-            "mutex", "condition_variable", "tuple", "string", "functional", "memory", "exception", "numeric", 
-            "type_traits", "initializer_list", "cstdint", "iostream", "iomanip", "sstream", "cstdlib", "cstdio", 
-            "valarray", "array", "tuple", "unordered_map", "unordered_set", "memory", "atomic", "complex", "queue", 
-            "deque", "list", "map", "set", "vector", "algorithm", "functional", "random", "regex", "locale", 
+            "chrono", "future", "numeric", "memory", "complex", "valarray", "exception", "bitset",
+            "tuple", "initializer_list", "atomic", "thread", "mutex", "shared_mutex", "condition_variable",
+            "unordered_map", "unordered_set", "deque", "array", "map", "set", "queue", "stack", "bitset",
+            "typeindex", "typeinfo", "exception", "stdexcept", "limits", "locale", "random", "regex", "functional",
+            "cctype", "cstdlib", "clocale", "cfenv", "cassert", "cstdarg", "cstdio", "cstring", "ctime", "cmath",
+            "cstdio", "cfloat", "climits", "iterator", "type_traits", "chrono", "thread", "future", "atomic",
+            "sstream", "sstream", "unordered_map", "unordered_set", "shared_ptr", "unique_ptr", "weak_ptr",
+            "mutex", "condition_variable", "tuple", "string", "functional", "memory", "exception", "numeric",
+            "type_traits", "initializer_list", "cstdint", "iostream", "iomanip", "sstream", "cstdlib", "cstdio",
+            "valarray", "array", "tuple", "unordered_map", "unordered_set", "memory", "atomic", "complex", "queue",
+            "deque", "list", "map", "set", "vector", "algorithm", "functional", "random", "regex", "locale",
             "bitset", "numeric", "chrono", "thread", "mutex", "condition_variable", "shared_mutex", "memory"
-        ]       
+        ]
 
 
         for library in cpp_headers:
@@ -1013,26 +978,26 @@ class Editor(QsciScintilla):
             "int", "float", "double", "char", "bool", "void", "if", "else", "while", "for", "switch", "case",
             "break", "continue", "return", "struct", "class", "public", "private", "protected", "namespace",
             "using", "include", "define", "template", "typename", "new", "delete", "try", "catch", "throw",
-            "alignas", "alignof", "const", "constexpr", "decltype", "dynamic_cast", "explicit", "export", 
-            "friend", "inline", "mutable", "noexcept", "nullptr", "operator", "private", "protected", 
+            "alignas", "alignof", "const", "constexpr", "decltype", "dynamic_cast", "explicit", "export",
+            "friend", "inline", "mutable", "noexcept", "nullptr", "operator", "private", "protected",
             "public", "reinterpret_cast", "static", "static_assert", "static_cast", "thread_local", "typeid"
         ]
         for kw in cpp_keywords:
             api.add(kw)
 
         cpp_functions = [
-            "main", "std::cout", "std::cin", "std::endl", "std::string", "std::vector", "std::map", 
-            "std::set", "std::list", "std::deque", "std::sort", "std::find", "std::max", "std::min", 
-            "std::abs", "std::swap", "std::to_string", "std::stoi", "std::stod", "std::stof", 
+            "main", "std::cout", "std::cin", "std::endl", "std::string", "std::vector", "std::map",
+            "std::set", "std::list", "std::deque", "std::sort", "std::find", "std::max", "std::min",
+            "std::abs", "std::swap", "std::to_string", "std::stoi", "std::stod", "std::stof",
             "std::thread", "std::mutex", "std::lock_guard", "std::unique_lock", "std::condition_variable"
         ]
         for func in cpp_functions:
             api.add(func)
 
         cpp_types = [
-            "std::string", "std::vector", "std::map", "std::set", "std::list", "std::deque", "std::pair", 
-            "std::tuple", "std::array", "std::unique_ptr", "std::shared_ptr", "std::weak_ptr", "std::function", 
-            "std::atomic", "std::mutex", "std::thread", "std::chrono", "std::exception", "std::runtime_error", 
+            "std::string", "std::vector", "std::map", "std::set", "std::list", "std::deque", "std::pair",
+            "std::tuple", "std::array", "std::unique_ptr", "std::shared_ptr", "std::weak_ptr", "std::function",
+            "std::atomic", "std::mutex", "std::thread", "std::chrono", "std::exception", "std::runtime_error",
             "std::invalid_argument", "std::out_of_range", "std::logic_error"
         ]
         for t in cpp_types:
@@ -1044,128 +1009,56 @@ class Editor(QsciScintilla):
         """Add C keywords, functions, and common headers to the auto-completion API."""
         # C headers
         c_headers = [
-        "#include", "#define", "#if", "#elif", "#else", "#endif", "#ifdef", "#ifndef", "#pragma", "#error", "#warning", 
-        "stdio.h", "stdlib", "string", "math", "time", "ctype", "assert", "float.h", "limits.h", "stdarg.h", "stddef.h", 
-        "inttypes.h", "stdint.h", "errno.h", "signal.h", "setjmp.h", "pthread.h", "unistd.h", "fcntl.h", "sys/types.h", 
-        "sys/stat.h", "sys/time.h", "sys/socket.h", "netinet/in.h", "arpa/inet.h", "dirent.h", "poll.h", "sys/ioctl.h", 
-        "sys/mman.h", "sys/utsname.h", "sys/sysctl.h", "syslog.h", "locale.h", "regex.h", "complex.h", "sys/resource.h", 
+        "#include", "#define", "#if", "#elif", "#else", "#endif", "#ifdef", "#ifndef", "#pragma", "#error", "#warning",
+        "stdio.h", "stdlib", "string", "math", "time", "ctype", "assert", "float.h", "limits.h", "stdarg.h", "stddef.h",
+        "inttypes.h", "stdint.h", "errno.h", "signal.h", "setjmp.h", "pthread.h", "unistd.h", "fcntl.h", "sys/types.h",
+        "sys/stat.h", "sys/time.h", "sys/socket.h", "netinet/in.h", "arpa/inet.h", "dirent.h", "poll.h", "sys/ioctl.h",
+        "sys/mman.h", "sys/utsname.h", "sys/sysctl.h", "syslog.h", "locale.h", "regex.h", "complex.h", "sys/resource.h",
         "pthread.h", "unistd.h", "fcntl.h", "signal.h", "stdalign.h"
         ]
-    
+
         for header in c_headers:
             api.add(header)
 
         # C keywords
         c_keywords = [
-        "int", "float", "double", "char", "long", "short", "signed", "unsigned", "void", "const", "volatile", "static", 
-        "extern", "register", "auto", "inline", "typedef", "sizeof", "enum", "struct", "union", "goto", "if", "else", 
-        "switch", "case", "break", "continue", "return", "for", "while", "do", "default", "typedef", "sizeof", 
+        "int", "float", "double", "char", "long", "short", "signed", "unsigned", "void", "const", "volatile", "static",
+        "extern", "register", "auto", "inline", "typedef", "sizeof", "enum", "struct", "union", "goto", "if", "else",
+        "switch", "case", "break", "continue", "return", "for", "while", "do", "default", "typedef", "sizeof",
         "typeof", "alignas", "alignof", "restrict", "noreturn", "noexcept", "typeof"
         ]
-    
+
         for kw in c_keywords:
             api.add(kw)
 
         # C standard library functions
         c_functions = [
-        "printf", "scanf", "sprintf", "sscanf", "fopen", "fclose", "fread", "fwrite", "fseek", "ftell", "rewind", 
-        "feof", "ferror", "perror", "malloc", "calloc", "realloc", "free", "exit", "abort", "atexit", "system", 
-        "getenv", "setenv", "unsetenv", "putenv", "memcpy", "memmove", "memcmp", "memset", "strcpy", "strncpy", 
-        "strcat", "strncat", "strcmp", "strncmp", "strlen", "strchr", "strrchr", "strstr", "strtok", "strdup", 
-        "strtol", "strtoul", "strtod", "strtof", "atof", "atoi", "atol", "abs", "labs", "div", "ldiv", "rand", 
-        "srand", "time", "clock", "localtime", "gmtime", "strftime", "difftime", "mktime", "exit", "fmod", "pow", 
-        "sqrt", "log", "log10", "exp", "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "ceil", "floor", 
-        "fabs", "frexp", "modf", "ldexp", "ldexp", "isalpha", "isdigit", "isalnum", "isspace", "isupper", "islower", 
-        "isprint", "isgraph", "isxdigit", "isblank", "toupper", "tolower", "strcoll", "strxfrm", "strcspn", 
+        "printf", "scanf", "sprintf", "sscanf", "fopen", "fclose", "fread", "fwrite", "fseek", "ftell", "rewind",
+        "feof", "ferror", "perror", "malloc", "calloc", "realloc", "free", "exit", "abort", "atexit", "system",
+        "getenv", "setenv", "unsetenv", "putenv", "memcpy", "memmove", "memcmp", "memset", "strcpy", "strncpy",
+        "strcat", "strncat", "strcmp", "strncmp", "strlen", "strchr", "strrchr", "strstr", "strtok", "strdup",
+        "strtol", "strtoul", "strtod", "strtof", "atof", "atoi", "atol", "abs", "labs", "div", "ldiv", "rand",
+        "srand", "time", "clock", "localtime", "gmtime", "strftime", "difftime", "mktime", "exit", "fmod", "pow",
+        "sqrt", "log", "log10", "exp", "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "ceil", "floor",
+        "fabs", "frexp", "modf", "ldexp", "ldexp", "isalpha", "isdigit", "isalnum", "isspace", "isupper", "islower",
+        "isprint", "isgraph", "isxdigit", "isblank", "toupper", "tolower", "strcoll", "strxfrm", "strcspn",
         "strspn", "strpbrk", "strlcpy", "strlcat", "getchar", "putchar", "getch", "putch", "gets", "puts"
         ]
-    
+
         for func in c_functions:
             api.add(func)
 
         # C types
         c_types = [
-        "int", "float", "double", "char", "long", "short", "signed", "unsigned", "void", "const", "volatile", 
-        "FILE", "size_t", "ptrdiff_t", "ssize_t", "off_t", "clock_t", "time_t", "jmp_buf", "va_list", "sigset_t", 
-        "pthread_t", "pthread_mutex_t", "pthread_cond_t", "pthread_attr_t", "pthread_key_t", "pthread_once_t", 
+        "int", "float", "double", "char", "long", "short", "signed", "unsigned", "void", "const", "volatile",
+        "FILE", "size_t", "ptrdiff_t", "ssize_t", "off_t", "clock_t", "time_t", "jmp_buf", "va_list", "sigset_t",
+        "pthread_t", "pthread_mutex_t", "pthread_cond_t", "pthread_attr_t", "pthread_key_t", "pthread_once_t",
         "pthread_rwlock_t", "pthread_spinlock_t", "pthread_barrier_t"
         ]
-    
+
         for t in c_types:
             api.add(t)
         api.prepare()
-
-# class VerifyAPI(QWidget):
-#     def __init__(self):
-#         super().__init__()
-
-#         self.setFixedSize(360, 144)
-
-#         self.msg = QLabel()
-#         self.msg.hide()
-
-#         self.prompt = QLineEdit()
-#         self.prompt.setObjectName("prompt")
-
-#         self.get_key = QPushButton("Get API Key")
-#         self.get_key.clicked.connect(lambda: webbrowser.open("https://aistudio.google.com/app/apikey"))
-
-#         self.have_key = QPushButton("Submit the Key")
-#         self.have_key.clicked.connect(self.getValues)
-
-#         self.prompt_layout = QVBoxLayout()
-#         self.prompt_layout.addWidget(self.prompt)
-#         self.prompt_layout.addWidget(self.msg)
-#         self.prompt_layout.addWidget(self.get_key)
-#         self.prompt_layout.addWidget(self.have_key)
-#         self.setLayout(self.prompt_layout)
-
-#         self.show()
-
-#     def Writedotenv(self, key: str, value: str):
-#         with open(".env", "a") as file:
-#             file.write(f'{key}="{value}"\n')
-
-#     def getValues(self):
-#         value = self.prompt.text()
-#         if value and self.verify_api_key(value):
-#             self.Writedotenv("API_KEY", value)
-#             self.Writedotenv("AI_MODEL", "gemini-1.5-flash")
-#             load_dotenv()  # Reload the .env file to load new values
-#             self.close()  # Close the prompt window
-#             read_dotenv()
-#             self.launch_main_ui()
-
-#     def verify_api_key(self, api_key):
-#         API_VERSION = 'v1beta'
-#         api_url = f'https://generativelanguage.googleapis.com/{API_VERSION}/models?key={api_key}'
-
-#         try:
-#             response = requests.get(api_url, headers={'Content-Type': 'application/json'})
-#             response.raise_for_status()  # Raise an exception for non-200 status codes
-#             return True
-
-#         except requests.ConnectionError as e:
-#             self.msg.setText("Network error")
-#             self.msg.show()
-#             return False
-
-#         except requests.exceptions.RequestException as e:
-#             self.msg.setText("Invalid Key")
-#             self.msg.show()
-#             return False
-
-
-#         except Exception as e:
-#             self.msg.setText("An unexpected error occurred")
-#             self.msg.show()
-#             return False
-
-#     def launch_main_ui(self):
-#         global editor
-#         editor = UI()  # Launch the main UI
-#         editor.setWindowIcon(QIcon(resource_path("icon.ico")))
-#         editor.show()
 
 
 def read_dotenv():
@@ -1173,30 +1066,3 @@ def read_dotenv():
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     AI_MODEL = os.getenv("AI_MODEL")
-
-# def load_stylesheet(file_name):  # Function to load a stylesheet from a file.
-
-#     with open(resource_path(file_name), 'r') as file:  # Opening the file in read mode.
-
-#         return file.read()  # Returning the content of the file.
-
-# def main():
-#     global app
-#     app = QApplication([])
-
-#     stylesheet = load_stylesheet("styles/style.qss")
-#     app.setStyleSheet(stylesheet)
-
-#     if os.path.exists('.env'):
-#         read_dotenv()
-#         global editor
-#         editor = UI()
-#         editor.setWindowIcon(QIcon(resource_path("icon.ico")))
-#         editor.show()
-#     else:
-#         prompt = VerifyAPI()
-
-#     app.exec_()
-
-# if __name__ == '__main__':
-#     main()
