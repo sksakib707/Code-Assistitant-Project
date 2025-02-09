@@ -265,7 +265,7 @@ class EditorUI(QWidget):
 
         self._prompt_command.addItem('explain')  # Adding 'explain' as an item.
 
-        self._prompt_command.addItem('fixt')  # Adding 'fixt' as an item.
+        self._prompt_command.addItem('fixit')  # Adding 'fixit' as an item.
 
         self._prompt_command.addItem('comment')  # Adding 'comment' as an item.
 
