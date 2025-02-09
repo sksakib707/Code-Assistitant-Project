@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QStackedWidget
 )
+from PyQt5.QtGui import QIcon
 from library import Library
 from editor import EditorUI as Editor
 
@@ -13,6 +14,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Student Assistant")
+        self.setWindowIcon(QIcon("codeicon.ico"))
         self.resize(1080, 720)
 
         # Dropdown menu
